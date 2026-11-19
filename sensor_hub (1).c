@@ -1,20 +1,4 @@
-/*
- * Multi-protocol sensor hub for STM32F401RE, using CMSIS device headers only.
- * Use as Core/Src/main.c with the STM32F401xE startup and linker files.
- * Start from the reset clock configuration: HSI 16 MHz, AHB/APB dividers 1.
- *
- * USART2: PA2 TX, PA3 RX, 115200 8N1 (Nucleo ST-LINK virtual COM).
- * ADC1: PA0, channel 0, analog input between GND and VDDA.
- * I2C1: PB8 SCL, PB9 SDA, external pull-ups to 3.3 V, TMP102 ADD0 to GND.
- * SPI1: PA5 SCK, PA6 MISO, PA7 MOSI, PA4 active-low CS, MCP3008 CH0.
- * Power both sensors at 3.3 V and connect all grounds. MCP3008 VREF to 3.3 V.
- *
- * TIM2 triggers an ADC sample every 20 ms. ADC1 end-of-conversion IRQ
- * hands off the sample. Bounded I2C/SPI transfers run in the foreground.
- * UART reports signed integer temperature, 10-bit SPI ADC and 12-bit ADC.
- * us measures from ADC trigger to snapshot complete, excluding UART.
- * Missing/slow peripherals report ERR. Latency must be measured on hardware.
- */
+
 
 #include "stm32f4xx.h"
 #include <stdbool.h>
@@ -115,8 +99,7 @@ static bool tmp102_read(int *temperature_c)
     if (!i2c_wait(I2C_SR1_ADDR, start))
         goto failed;
 
-    /* Read only the MSB in default 12-bit mode for integer degrees.
-       For a one-byte read, clear ACK, clear ADDR, then request STOP. */
+   
     uint32_t primask = __get_PRIMASK();
     __disable_irq();
     I2C1->CR1 &= ~I2C_CR1_ACK;
